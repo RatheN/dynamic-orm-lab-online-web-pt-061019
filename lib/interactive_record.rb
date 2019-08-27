@@ -14,7 +14,7 @@ class InteractiveRecord
 
     table_info = DB[:conn].execute(sql)
     column_names = []
-    table_info.each { |r| column_names << r["name"] }
+    table_info.each {|r| column_names << r["name"]}
     column_names.compact
   end
 
@@ -22,5 +22,21 @@ class InteractiveRecord
     options.each do |property, value|
       self.send("#{property}=", value)
     end
+  end
+
+  def table_name_for_insert
+    self.class.table_name
+  end
+
+  def col_names_for_insert
+    self.class.column_names.delete_if {|c| c == "id"}.join(", ")
+  end
+
+  def values_for_insert
+    values = []
+    self.class.column_names.each do |cn|
+      values << "'#{send(cn)}'" unless send(cn).nil?
+    end
+    values.join(", ")
   end
 end
